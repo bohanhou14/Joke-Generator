@@ -51,7 +51,7 @@ app.post("/another-joke", function(req, res){
                 var setup = JsonData['setup'];
                 var delivery = JsonData['delivery'];
                 if(setup===undefined ){
-                    setup = "Sorry, JokeAPI just made a mistake. I would go punish the author. Please find another joke~";
+                    setup = "Sorry, JokeAPI just made a mistake. I will go to hit its author. Please find another joke~";
                     delivery = "-- Bohan";
                 }
                 res.render("pages/joke.ejs", {
