@@ -4,13 +4,15 @@ const request = require("request");
 const https = require("https");
 
 const app = express();
+const ejs = require('ejs');
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended:false}));
+app.set('view engine', 'ejs');
 
 // Setting up the main page
 app.get("/", function(req, res){
-    res.sendFile(__dirname + "/start.html");
+    res.render("pages/start.ejs");
 });
 
 // Joke page
@@ -18,20 +20,50 @@ app.post("/", (req, res) => {
     const joke_url = "https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky,Christmas?blacklistFlags=racist,sexist";
 
     const request = https.get(joke_url, function (response){
+
         if(response.statusCode === 200) {
-             res.sendFile(__dirname + "/joke.html")
+            response.on("data", function (data) {
+                var JsonData = JSON.parse(data);
+                const setup = JsonData['setup'];
+                const delivery = JsonData['delivery'];
+                res.render("pages/joke.ejs", {
+                    setup: setup,
+                    delivery: delivery
+                 });
+            });
          } else {
-             res.sendFile(__dirname + "/failure.html")
+             res.render("pages/failure.ejs")
          }
 
-        response.on("data", function (data) {
-            const JsonData = JSON.parse(data);
-            const setup = JsonData.setup;
-            const delivery = JsonData.delivery;
-        });
+        
     });
 
 })
+
+app.post("/another-joke", function(req, res){
+    const joke_url = "https://v2.jokeapi.dev/joke/Miscellaneous,Dark,Pun,Spooky,Christmas?blacklistFlags=racist,sexist";
+
+    const request = https.get(joke_url, function (response){
+
+        if(response.statusCode === 200) {
+            response.on("data", function (data) {
+                var JsonData = JSON.parse(data);
+                var setup = JsonData['setup'];
+                var delivery = JsonData['delivery'];
+                if(setup===undefined ){
+                    setup = "Sorry, JokeAPI just made a mistake. I would go punish the author. Please find another joke~";
+                    delivery = "-- Bohan";
+                }
+                res.render("pages/joke.ejs", {
+                    setup: setup,
+                    delivery: delivery
+                 });
+            });
+         } else {
+             res.render("pages/failure.ejs")
+         }
+    });
+});
 
 app.post("/failure", function(req, res){
     res.redirect("/");
